@@ -1,20 +1,17 @@
-const express = require('express');
-const app = express();
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const port = process.env.PORT || 5000;
-const db = require('./config/keys').mongoURI;
-const waifus = require('./routes/api/waifus');
+require('dotenv').config();
+const app = require('./app');
+const connectDb = require('./db/mongodb');
+const { appConfig, dbConfig } = require('./config');
 
 
-app.use(bodyParser.json());
+async function initApp (appConfig, dbConfig ) {
+    try {
+        await connectDb(dbConfig);
+        app.listen(appConfig.port, () => console.log(`server started on port ${appConfig.port}`));
+    } catch (e) {
+        console.log(e)
+        process.exit(0)
+    }
+}
 
-mongoose
-    .connect(db, { useNewUrlParser: true })
-    .then(() => console.log('Connected to DB'))
-    .catch(err => console.log(err));
-
-// USe Routes
-app.use('/api/waifus', waifus);
-
-app.listen(port, () => console.log(`server started on port ${port}`));
+initApp(appConfig, dbConfig);
